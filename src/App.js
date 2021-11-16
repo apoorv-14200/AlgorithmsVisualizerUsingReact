@@ -91,7 +91,6 @@ class App extends Component {
         }
       }
     }
-    console.log(this.state.graph);
   };
   shownext = () => {
     const { gamestate, source, destination } = this.state;
@@ -109,7 +108,6 @@ class App extends Component {
   };
   handleNext = () => {
     const curstate = this.state.gamestate;
-    console.log(curstate);
     if (curstate == 3) {
       let q = [];
       q.push(this.state.source);
@@ -156,19 +154,42 @@ class App extends Component {
       return 0;
     }
   };
+  getdirection = (cur, next) => {
+    const { row, col } = this.state;
+    let currow = Math.floor(cur / col);
+    let curcol = cur % col;
+    let nxtrow = Math.floor(next / col);
+    let nxtcol = next % col;
+    console.log(currow, curcol, nxtrow, nxtcol);
+    if (nxtrow == currow) {
+      if (nxtcol < curcol) {
+        //left
+        return 41;
+      } else {
+        //right
+        return 42;
+      }
+    } else {
+      if (nxtrow < currow) {
+        //up
+        return 43;
+      } else {
+        //down
+        return 44;
+      }
+    }
+  };
   makepath = () => {
     let path = [];
     const { source, destination } = this.state;
     let cur = destination;
     let parent = this.state.parent;
-    let cnt = 500;
-    while (cnt > 0 && cur != source) {
-      console.log(cur);
+    while (cur != source) {
       path.push(cur);
       cur = parent[cur];
-      cnt--;
     }
     path.push(cur);
+    path.reverse();
     let idx = 0;
     let pathid = setInterval(() => {
       if (idx == path.length) {
@@ -178,13 +199,16 @@ class App extends Component {
         });
       }
       let curgraph = this.state.graph;
-      curgraph[path[idx]] = 4;
+      if (idx < path.length - 1) {
+        curgraph[path[idx]] = this.getdirection(path[idx], path[idx + 1]);
+      } else {
+        curgraph[path[idx]] = 40;
+      }
       this.setState({
         graph: curgraph,
       });
       idx++;
-      console.log("making path");
-    }, 10);
+    }, 50);
   };
   playbfs = () => {
     this.state.myid = setInterval(() => {
@@ -198,7 +222,9 @@ class App extends Component {
         this.setState({
           over: true,
         });
-        this.makepath();
+        if (pathfound) {
+          this.makepath();
+        }
       } else {
         let cur = q.shift();
         let currow = Math.floor(cur / col);
@@ -234,7 +260,7 @@ class App extends Component {
           parent: curparent,
         });
       }
-    }, 1);
+    }, 50);
   };
   delay = (ms) => {
     return new Promise((resolve) => {
@@ -256,7 +282,7 @@ class App extends Component {
     this.setState({
       graph: curgraph,
     });
-    await this.delay(3);
+    await this.delay(50);
     const { row, col } = this.state;
     let cur = src;
     let currow = Math.floor(cur / col);
@@ -286,6 +312,12 @@ class App extends Component {
   algoselect = (algo) => {
     this.setState({
       algorithm: algo,
+    });
+  };
+  handleback = () => {
+    let curstate = this.state.gamestate;
+    this.setState({
+      gamestate: curstate - 1,
     });
   };
   render() {
@@ -321,6 +353,9 @@ class App extends Component {
           )}
           {gamestate == 1 && (
             <button onClick={() => this.algoselect("DFS")}>DFS</button>
+          )}
+          {gamestate > 0 && over == false && gamestate != 4 && (
+            <button onClick={this.handleback}>Back</button>
           )}
         </div>
         <div className="graph">

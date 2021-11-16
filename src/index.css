@@ -87,7 +87,12 @@ code {
   height: 28px;
   border: solid rgb(0, 0, 0) 1px;
   border-radius: 5px;
+  text-align: center;
+  font-size: large;
+  font-weight: 500;
   background-color: rgb(129, 158, 180);
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 3px 0px,
+    rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;
 }
 
 .source {
